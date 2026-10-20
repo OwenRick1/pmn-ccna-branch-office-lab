@@ -1,0 +1,246 @@
+! ===== SW1 : paste into the PMN-OS CLI =====
+enable
+configure terminal
+hostname SW1
+!
+service password-encryption
+no ip domain-lookup
+ip domain-name branch.lab
+enable secret Cisc0Enable!
+username admin privilege 15 secret Cisc0Admin!
+!
+vtp mode transparent
+!
+spanning-tree mode rapid-pvst
+!
+vlan 10
+ name SALES
+!
+vlan 20
+ name IT
+!
+vlan 30
+ name GUEST
+!
+vlan 99
+ name MGMT
+!
+vlan 999
+ name BLACKHOLE
+!
+interface Port-channel1
+ description Trunk to DSW1 (LACP bundle)
+ switchport trunk native vlan 99
+ switchport trunk allowed vlan 10,20,30,99
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/1
+ description PC1 SALES
+ switchport access vlan 10
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation restrict
+ switchport port-security mac-address sticky
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+!
+interface FastEthernet0/2
+ description PC2 IT
+ switchport access vlan 20
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation restrict
+ switchport port-security mac-address sticky
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+!
+interface FastEthernet0/3
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/4
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/5
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/6
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/7
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/8
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/9
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/10
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/11
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/12
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/13
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/14
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/15
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/16
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/17
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/18
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/19
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/20
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/21
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/22
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet0/1
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet0/2
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/23
+ description Po1 member to DSW1 Fa0/23
+ switchport trunk native vlan 99
+ switchport trunk allowed vlan 10,20,30,99
+ switchport mode trunk
+ switchport nonegotiate
+ channel-group 1 mode active
+ no shutdown
+!
+interface FastEthernet0/24
+ description Po1 member to DSW1 Fa0/24
+ switchport trunk native vlan 99
+ switchport trunk allowed vlan 10,20,30,99
+ switchport mode trunk
+ switchport nonegotiate
+ channel-group 1 mode active
+ no shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan99
+ description Management
+ ip address 192.168.99.11 255.255.255.0
+ no shutdown
+!
+ip default-gateway 192.168.99.1
+!
+ip access-list standard MGMT_ACCESS
+ permit 192.168.20.0 0.0.0.255
+ permit 192.168.99.0 0.0.0.255
+!
+crypto key generate rsa general-keys modulus 2048
+ip ssh version 2
+!
+banner motd #Authorized access only - Branch Office lab#
+!
+line con 0
+ logging synchronous
+line vty 0 4
+ access-class MGMT_ACCESS in
+ exec-timeout 10 0
+ login local
+ transport input ssh
+line vty 5 15
+ access-class MGMT_ACCESS in
+ exec-timeout 10 0
+ login local
+ transport input ssh
+!
+end
+write memory

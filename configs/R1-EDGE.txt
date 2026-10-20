@@ -1,0 +1,72 @@
+! ===== R1-EDGE : paste into the PMN-OS CLI =====
+enable
+configure terminal
+hostname R1-EDGE
+!
+service password-encryption
+no ip domain-lookup
+ip domain-name branch.lab
+enable secret Cisc0Enable!
+username admin privilege 15 secret Cisc0Admin!
+!
+interface Loopback0
+ description OSPF router-id
+ ip address 1.1.1.1 255.255.255.255
+!
+interface GigabitEthernet0/0
+ description WAN to ISP
+ ip address 203.0.113.2 255.255.255.252
+ ip nat outside
+ no shutdown
+!
+interface GigabitEthernet0/1
+ description LAN to DSW1 Gi0/2
+ ip address 10.0.0.1 255.255.255.252
+ ip nat inside
+ ip ospf network point-to-point
+ no shutdown
+!
+interface GigabitEthernet0/2
+ no ip address
+ shutdown
+!
+interface GigabitEthernet0/3
+ no ip address
+ shutdown
+!
+router ospf 1
+ router-id 1.1.1.1
+ passive-interface Loopback0
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.0.0.0 0.0.0.3 area 0
+ default-information originate
+!
+ip route 0.0.0.0 0.0.0.0 203.0.113.1
+!
+ip access-list standard NAT_INSIDE
+ permit 192.168.10.0 0.0.0.255
+ permit 192.168.20.0 0.0.0.255
+ permit 192.168.30.0 0.0.0.255
+ permit 192.168.40.0 0.0.0.255
+!
+ip nat inside source list NAT_INSIDE interface GigabitEthernet0/0 overload
+!
+ip access-list standard MGMT_ACCESS
+ permit 192.168.20.0 0.0.0.255
+ permit 192.168.99.0 0.0.0.255
+!
+crypto key generate rsa general-keys modulus 2048
+ip ssh version 2
+!
+banner motd #Authorized access only - Branch Office lab#
+!
+line con 0
+ logging synchronous
+line vty 0 4
+ access-class MGMT_ACCESS in
+ exec-timeout 10 0
+ login local
+ transport input ssh
+!
+end
+write memory

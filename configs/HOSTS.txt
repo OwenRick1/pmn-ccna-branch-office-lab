@@ -1,0 +1,7 @@
+Endpoint IP settings (Desktop > IP Configuration)
+INET-SRV  STATIC  198.51.100.10   255.255.255.0   198.51.100.1
+SRV1      STATIC  192.168.40.10   255.255.255.0   192.168.40.1
+PC1       DHCP    (lease)                         (from DHCP)
+PC2       DHCP    (lease)                         (from DHCP)
+PC3       DHCP    (lease)                         (from DHCP)
+PC4       DHCP    (lease)                         (from DHCP)

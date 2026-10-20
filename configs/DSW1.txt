@@ -1,0 +1,316 @@
+! ===== DSW1 : paste into the PMN-OS CLI =====
+enable
+configure terminal
+hostname DSW1
+!
+service password-encryption
+no ip domain-lookup
+ip domain-name branch.lab
+enable secret Cisc0Enable!
+username admin privilege 15 secret Cisc0Admin!
+!
+vtp mode transparent
+!
+ip routing
+!
+ip dhcp excluded-address 192.168.10.1 192.168.10.10
+ip dhcp excluded-address 192.168.20.1 192.168.20.10
+ip dhcp excluded-address 192.168.30.1 192.168.30.10
+!
+ip dhcp pool SALES
+ network 192.168.10.0 255.255.255.0
+ default-router 192.168.10.1
+ dns-server 192.168.40.10
+ domain-name branch.lab
+!
+ip dhcp pool IT
+ network 192.168.20.0 255.255.255.0
+ default-router 192.168.20.1
+ dns-server 192.168.40.10
+ domain-name branch.lab
+!
+ip dhcp pool GUEST
+ network 192.168.30.0 255.255.255.0
+ default-router 192.168.30.1
+ dns-server 8.8.8.8
+ domain-name branch.lab
+!
+spanning-tree mode rapid-pvst
+spanning-tree vlan 1,10,20,30,40,99 priority 4096
+!
+vlan 10
+ name SALES
+!
+vlan 20
+ name IT
+!
+vlan 30
+ name GUEST
+!
+vlan 40
+ name SERVERS
+!
+vlan 99
+ name MGMT
+!
+vlan 999
+ name BLACKHOLE
+!
+interface Port-channel1
+ description Trunk to SW1 (LACP bundle)
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 99
+ switchport trunk allowed vlan 10,20,30,99
+ switchport mode trunk
+ switchport nonegotiate
+!
+interface FastEthernet0/1
+ description SRV1 internal server
+ switchport access vlan 40
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation restrict
+ switchport port-security mac-address sticky
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ no shutdown
+!
+interface FastEthernet0/2
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/3
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/4
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/5
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/6
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/7
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/8
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/9
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/10
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/11
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/12
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/13
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/14
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/15
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/16
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/17
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/18
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/19
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/20
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/21
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/22
+ description UNUSED
+ switchport access vlan 999
+ switchport mode access
+ shutdown
+!
+interface FastEthernet0/23
+ description Po1 member to SW1 Fa0/23
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 99
+ switchport trunk allowed vlan 10,20,30,99
+ switchport mode trunk
+ switchport nonegotiate
+ channel-group 1 mode active
+ no shutdown
+!
+interface FastEthernet0/24
+ description Po1 member to SW1 Fa0/24
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 99
+ switchport trunk allowed vlan 10,20,30,99
+ switchport mode trunk
+ switchport nonegotiate
+ channel-group 1 mode active
+ no shutdown
+!
+interface GigabitEthernet0/1
+ description Trunk to SW2 Gi0/1
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 99
+ switchport trunk allowed vlan 10,20,30,99
+ switchport mode trunk
+ switchport nonegotiate
+ no shutdown
+!
+interface GigabitEthernet0/2
+ description Routed link to R1-EDGE Gi0/1
+ no switchport
+ ip address 10.0.0.2 255.255.255.252
+ ip ospf network point-to-point
+ no shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan10
+ description SALES gateway
+ ip address 192.168.10.1 255.255.255.0
+ no shutdown
+!
+interface Vlan20
+ description IT gateway
+ ip address 192.168.20.1 255.255.255.0
+ no shutdown
+!
+interface Vlan30
+ description GUEST gateway
+ ip address 192.168.30.1 255.255.255.0
+ ip access-group GUEST_POLICY in
+ no shutdown
+!
+interface Vlan40
+ description SERVERS gateway
+ ip address 192.168.40.1 255.255.255.0
+ no shutdown
+!
+interface Vlan99
+ description MGMT gateway
+ ip address 192.168.99.1 255.255.255.0
+ no shutdown
+!
+router ospf 1
+ router-id 2.2.2.2
+ passive-interface Vlan10
+ passive-interface Vlan20
+ passive-interface Vlan30
+ passive-interface Vlan40
+ passive-interface Vlan99
+ network 10.0.0.0 0.0.0.3 area 0
+ network 192.168.10.0 0.0.0.255 area 0
+ network 192.168.20.0 0.0.0.255 area 0
+ network 192.168.30.0 0.0.0.255 area 0
+ network 192.168.40.0 0.0.0.255 area 0
+ network 192.168.99.0 0.0.0.255 area 0
+!
+ip access-list extended GUEST_POLICY
+ remark Guests may reach the Internet only
+ deny ip 192.168.30.0 0.0.0.255 192.168.10.0 0.0.0.255
+ deny ip 192.168.30.0 0.0.0.255 192.168.20.0 0.0.0.255
+ deny ip 192.168.30.0 0.0.0.255 192.168.40.0 0.0.0.255
+ deny ip 192.168.30.0 0.0.0.255 192.168.99.0 0.0.0.255
+ permit ip any any
+!
+ip access-list standard MGMT_ACCESS
+ permit 192.168.20.0 0.0.0.255
+ permit 192.168.99.0 0.0.0.255
+!
+crypto key generate rsa general-keys modulus 2048
+ip ssh version 2
+!
+banner motd #Authorized access only - Branch Office lab#
+!
+line con 0
+ logging synchronous
+line vty 0 4
+ access-class MGMT_ACCESS in
+ exec-timeout 10 0
+ login local
+ transport input ssh
+line vty 5 15
+ access-class MGMT_ACCESS in
+ exec-timeout 10 0
+ login local
+ transport input ssh
+!
+end
+write memory
